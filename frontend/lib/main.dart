@@ -6,17 +6,15 @@ import 'package:frontend/pages/profile_screen.dart';
 import 'package:frontend/repository/profile_repo.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Student List',
+      debugShowCheckedModeBanner: false,
+      title: 'Students App',
       home: BlocProvider(
         create: (context) =>
             ProfileBloc(ProfileRepoImplement())..add(FetchProfiles()),
