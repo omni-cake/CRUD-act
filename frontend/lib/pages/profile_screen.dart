@@ -10,13 +10,10 @@ class ProfileScreen extends StatefulWidget {
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
-//TODO: SWITCH IS NOT WORKING
-
 class _ProfileScreenState extends State<ProfileScreen> {
   String _selectedYear = 'First Year';
   bool _isEnrolled = false;
   final List<String> _yearOptions = [
-    '',
     'First Year',
     'Second Year',
     'Third Year',
@@ -67,8 +64,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Icons.delete,
                           color: Colors.red,
                         ),
-                        onPressed: () => BlocProvider.of<ProfileBloc>(context)
-                            .add(DeleteProfile(profile.id)),
+                        onPressed: () {
+                          print(
+                              "Attempting to delete profile with ID: ${profile.id}"); // Add this for debugging
+                          BlocProvider.of<ProfileBloc>(context)
+                              .add(DeleteProfile(profile.id));
+                        },
                       ),
                     ],
                   ),
@@ -93,85 +94,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
         TextEditingController(text: profile?.lastName ?? '');
     final courseController = TextEditingController(text: profile?.course ?? '');
 
+    // Set the initial values for editing
     _isEnrolled = profile?.enrolled ?? false;
+    String _selectedYearInDialog =
+        profile?.year ?? _yearOptions[1]; // Avoid empty initial value
 
     showDialog(
       context: context,
       builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(isUpdate ? 'Update Student' : 'Create Student'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: firstNameController,
-                decoration: InputDecoration(labelText: 'First Name'),
+        return StatefulBuilder(
+          builder: (BuildContext dialogContext, StateSetter setDialogState) {
+            return AlertDialog(
+              title: Text(isUpdate ? 'Update Student' : 'Create Student'),
+              content: SingleChildScrollView(
+                // Added to allow resizing
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: firstNameController,
+                      decoration: InputDecoration(labelText: 'First Name'),
+                    ),
+                    TextField(
+                      controller: lastNameController,
+                      decoration: InputDecoration(labelText: 'Last Name'),
+                    ),
+                    TextField(
+                      controller: courseController,
+                      decoration: InputDecoration(labelText: 'Course'),
+                    ),
+                    DropdownButton<String>(
+                      value: _yearOptions.contains(_selectedYearInDialog)
+                          ? _selectedYearInDialog
+                          : _yearOptions[0],
+                      onChanged: (String? newValue) {
+                        setDialogState(() {
+                          _selectedYearInDialog = newValue!;
+                        });
+                      },
+                      items: _yearOptions
+                          .map<DropdownMenuItem<String>>((String year) {
+                        return DropdownMenuItem<String>(
+                          value: year,
+                          child: Text(year),
+                        );
+                      }).toList(),
+                    ),
+
+                    //Secondary option besides just removing the additional empty string in the _selectedyear.
+                    //This way, if the value is empty, it will prompt the user to "Select Year" instead of throwing an error.
+//DropdownButton<String>(
+//   value: _selectedYearInDialog.isNotEmpty ? _selectedYearInDialog : null,
+//   onChanged: (String? newValue) {
+//     setDialogState(() {
+//       _selectedYearInDialog = newValue!;
+//     });
+//   },
+//   items: _yearOptions
+//       .map<DropdownMenuItem<String>>((String year) {
+//     return DropdownMenuItem<String>(
+//       value: year,
+//       child: Text(year.isNotEmpty ? year : 'Select Year'),
+//     );
+//   }).toList(),
+// ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Enrolled'),
+                        Switch(
+                          value: _isEnrolled,
+                          onChanged: (bool newValue) {
+                            setDialogState(() {
+                              _isEnrolled = newValue;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-              TextField(
-                controller: lastNameController,
-                decoration: InputDecoration(labelText: 'Last Name'),
-              ),
-              TextField(
-                controller: courseController,
-                decoration: InputDecoration(labelText: 'Course'),
-              ),
-              DropdownButton<String>(
-                value: _selectedYear,
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _selectedYear = newValue!;
-                  });
-                },
-                items:
-                    _yearOptions.map<DropdownMenuItem<String>>((String year) {
-                  return DropdownMenuItem<String>(
-                    value: year,
-                    child: Text(year),
-                  );
-                }).toList(),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Enrolled'),
-                  Switch(
-                    value: _isEnrolled,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        _isEnrolled = newValue;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                final studentBloc = BlocProvider.of<ProfileBloc>(context);
-                final newStudent = StudentProfile(
-                  id: isUpdate ? profile!.id : '',
-                  firstName: firstNameController.text,
-                  lastName: lastNameController.text,
-                  course: courseController.text,
-                  year: (_selectedYear),
-                  enrolled: _isEnrolled,
-                );
-                if (isUpdate) {
-                  studentBloc.add(UpdateProfile(newStudent.id, newStudent));
-                } else {
-                  studentBloc.add(CreateProfile(newStudent));
-                }
-                Navigator.pop(dialogContext);
-              },
-              child: Text(isUpdate ? 'Update' : 'Create'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(dialogContext),
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final studentBloc = BlocProvider.of<ProfileBloc>(context);
+                    final newStudent = StudentProfile(
+                      id: isUpdate ? profile!.id : '',
+                      firstName: firstNameController.text,
+                      lastName: lastNameController.text,
+                      course: courseController.text,
+                      year: _selectedYearInDialog, // Use the local variable
+                      enrolled: _isEnrolled,
+                    );
+                    if (isUpdate) {
+                      studentBloc.add(UpdateProfile(newStudent.id, newStudent));
+                    } else {
+                      studentBloc.add(CreateProfile(newStudent));
+                    }
+                    Navigator.pop(dialogContext);
+                  },
+                  child: Text(isUpdate ? 'Update' : 'Create'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

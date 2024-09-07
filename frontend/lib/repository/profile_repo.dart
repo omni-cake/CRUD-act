@@ -10,7 +10,7 @@ abstract class ProfileRepo {
 }
 
 class ProfileRepoImplement implements ProfileRepo {
-  static const String baseUrl = "http://localhost:5000/profiles";
+  static const String baseUrl = "http://192.168.100.134:5000/profiles";
 
   @override
   Future<List<StudentProfile>> fetchProfiles() async {
@@ -41,11 +41,11 @@ class ProfileRepoImplement implements ProfileRepo {
 
   @override
   Future<void> deleteProfile(String id) async {
-    // TODO: implement deleteProfile
+    print("Deleting profile with ID: $id"); // Add this line to check
     final response = await http.delete(Uri.parse('$baseUrl/$id'));
 
     if (response.statusCode != 204) {
-      throw Exception('Failed to delete student profile');
+      throw Exception("Failed to delete student profile");
     }
   }
 

@@ -1,6 +1,4 @@
-import "package:equatable/equatable.dart";
-
-class StudentProfile extends Equatable {
+class StudentProfile {
   final String id;
   final String firstName;
   final String lastName;
@@ -19,26 +17,22 @@ class StudentProfile extends Equatable {
 
   factory StudentProfile.fromJson(Map<String, dynamic> json) {
     return StudentProfile(
-        id: json["id"] as String,
-        firstName: json["firstName"] as String,
-        lastName: json["lastName"] as String,
-        course: json["course"] as String,
-        year: json["year"] as String,
-        enrolled: json["enrolled"] as bool);
+      id: json['_id'] ?? '', // Ensure the ID is set from the backend response
+      firstName: json['firstName'],
+      lastName: json['lastName'],
+      course: json['course'],
+      year: json['year'],
+      enrolled: json['enrolled'],
+    );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      "id": id,
-      "firstName": firstName,
-      "lastName": lastName,
-      "course": course,
-      "year": year,
-      "enrolled": enrolled,
+      'firstName': firstName,
+      'lastName': lastName,
+      'course': course,
+      'year': year,
+      'enrolled': enrolled,
     };
   }
-
-  @override
-  // TODO: implement props
-  List<Object?> get props => [id, firstName, lastName, course, year, enrolled];
 }

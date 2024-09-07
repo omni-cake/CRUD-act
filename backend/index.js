@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use("/profiles", profileRoute);
 
-const port = process.env.port || 5000;
+const port = process.env.PORT || 5000;
 
 mongoose
     .connect(process.env.MONGO_URI)
