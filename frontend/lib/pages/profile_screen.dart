@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:frontend/models/studentProfileCard.dart';
 import 'package:frontend/models/studentProfiles.dart';
 import '../blocs/profile_bloc.dart';
 import '../blocs/profile_event.dart';
@@ -23,13 +24,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Students'),
+        backgroundColor: Colors.black26,
+        centerTitle: true,
+        title: const Text(
+          'Students',
+          style: TextStyle(color: Colors.white),
+        ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.person_add_alt_1,
-              color: Colors.lightGreen,
+              size: 50,
+              color: Colors.white,
             ),
             onPressed: () => _showStudentDialog(context, isUpdate: false),
           ),
@@ -38,41 +46,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
           if (state is ProfileLoading) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (state is ProfileLoaded) {
             return ListView.builder(
               itemCount: state.studentProfile.length,
               itemBuilder: (context, index) {
                 final profile = state.studentProfile[index];
-                return ListTile(
-                  title: Text('${profile.firstName} ${profile.lastName}'),
-                  subtitle:
-                      Text('Course: ${profile.course}, Year: ${profile.year}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          Icons.edit,
-                          color: Colors.green,
-                        ),
-                        onPressed: () => _showStudentDialog(context,
-                            profile: profile, isUpdate: true),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                        ),
-                        onPressed: () {
-                          print(
-                              "Attempting to delete profile with ID: ${profile.id}"); // Add this for debugging
-                          BlocProvider.of<ProfileBloc>(context)
-                              .add(DeleteProfile(profile.id));
-                        },
-                      ),
-                    ],
+                return StudentProfileCard(
+                  profile: profile,
+                  onEdit: () => _showStudentDialog(
+                    context,
+                    profile: profile,
+                    isUpdate: true,
                   ),
+                  onDelete: () {
+                    BlocProvider.of<ProfileBloc>(context)
+                        .add(DeleteProfile(profile.id));
+                  },
                 );
               },
             );
@@ -94,10 +84,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         TextEditingController(text: profile?.lastName ?? '');
     final courseController = TextEditingController(text: profile?.course ?? '');
 
-    // Set the initial values for editing
+    // Set the initial values for editing, and check if the value is valid
     _isEnrolled = profile?.enrolled ?? false;
-    String _selectedYearInDialog =
-        profile?.year ?? _yearOptions[1]; // Avoid empty initial value
+    String _selectedYearInDialog = _yearOptions.contains(profile?.year)
+        ? profile!.year // Use profile's year if it's valid
+        : _yearOptions.first; // Default to the first year if invalid or null
 
     showDialog(
       context: context,
@@ -107,26 +98,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return AlertDialog(
               title: Text(isUpdate ? 'Update Student' : 'Create Student'),
               content: SingleChildScrollView(
-                // Added to allow resizing
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
                       controller: firstNameController,
-                      decoration: InputDecoration(labelText: 'First Name'),
+                      decoration:
+                          const InputDecoration(labelText: 'First Name'),
                     ),
                     TextField(
                       controller: lastNameController,
-                      decoration: InputDecoration(labelText: 'Last Name'),
+                      decoration: const InputDecoration(labelText: 'Last Name'),
                     ),
                     TextField(
                       controller: courseController,
-                      decoration: InputDecoration(labelText: 'Course'),
+                      decoration: const InputDecoration(labelText: 'Course'),
                     ),
                     DropdownButton<String>(
-                      value: _yearOptions.contains(_selectedYearInDialog)
-                          ? _selectedYearInDialog
-                          : _yearOptions[0],
+                      value: _selectedYearInDialog,
                       onChanged: (String? newValue) {
                         setDialogState(() {
                           _selectedYearInDialog = newValue!;
@@ -140,29 +129,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         );
                       }).toList(),
                     ),
-
-                    //Secondary option besides just removing the additional empty string in the _selectedyear.
-                    //This way, if the value is empty, it will prompt the user to "Select Year" instead of throwing an error.
-//DropdownButton<String>(
-//   value: _selectedYearInDialog.isNotEmpty ? _selectedYearInDialog : null,
-//   onChanged: (String? newValue) {
-//     setDialogState(() {
-//       _selectedYearInDialog = newValue!;
-//     });
-//   },
-//   items: _yearOptions
-//       .map<DropdownMenuItem<String>>((String year) {
-//     return DropdownMenuItem<String>(
-//       value: year,
-//       child: Text(year.isNotEmpty ? year : 'Select Year'),
-//     );
-//   }).toList(),
-// ),
-
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Enrolled'),
+                        const Text('Enrolled'),
                         Switch(
                           value: _isEnrolled,
                           onChanged: (bool newValue) {
@@ -179,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(dialogContext),
-                  child: Text('Cancel'),
+                  child: const Text('Cancel'),
                 ),
                 TextButton(
                   onPressed: () {
@@ -189,7 +159,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       firstName: firstNameController.text,
                       lastName: lastNameController.text,
                       course: courseController.text,
-                      year: _selectedYearInDialog, // Use the local variable
+                      year:
+                          _selectedYearInDialog, // Use the updated local variable
                       enrolled: _isEnrolled,
                     );
                     if (isUpdate) {
