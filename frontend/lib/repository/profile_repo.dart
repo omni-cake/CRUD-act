@@ -10,7 +10,7 @@ abstract class ProfileRepo {
 }
 
 class ProfileRepoImplement implements ProfileRepo {
-  static const String baseUrl = "http://192.168.158.108:5000/profiles";
+  static const String baseUrl = "http://localhost:5000/profiles";
   //USE IPv4 of network if with device. USE "localhost" if emulator
 
   @override

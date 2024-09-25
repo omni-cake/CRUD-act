@@ -14,7 +14,7 @@ app.use("/profiles", profileRoute);
 const port = process.env.PORT || 5000;
 
 mongoose
-    .connect(process.env.MONGO_URI)
+    .connect("mongodb+srv://joaquingabrielcamangeg6:d863ZpS8ywoAhKpI@cluster0.yihls.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     .then(() => console.log("MongoDB connected"))
     .catch((error) => console.log("MongoDB connection error: ", error));
 
