@@ -19,6 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'Second Year',
     'Third Year',
     'Fourth Year',
+    'Fifth Year',
   ];
 
   @override
@@ -32,16 +33,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'Students',
           style: TextStyle(color: Colors.white),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.person_add_alt_1,
-              size: 50,
-              color: Colors.white,
-            ),
-            onPressed: () => _showStudentDialog(context, isUpdate: false),
-          ),
-        ],
       ),
       body: BlocBuilder<ProfileBloc, ProfileState>(
         builder: (context, state) {
@@ -72,6 +63,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return Container();
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
+        child: Icon(
+          Icons.person_add_alt_1,
+          size: 30,
+          color: Colors.black,
+        ),
+        onPressed: () => _showStudentDialog(context, isUpdate: false),
       ),
     );
   }
