@@ -27,11 +27,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.black26,
+        backgroundColor: Colors.orange.shade600,
         centerTitle: true,
         title: const Text(
           'Students',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black,),
         ),
       ),
       body: BlocBuilder<ProfileBloc, ProfileState>(
@@ -65,7 +65,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.orange.shade600,
         child: Icon(
           Icons.person_add_alt_1,
           size: 30,
